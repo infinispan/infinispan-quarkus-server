@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.infinispan.configuration.internal.PrivateGlobalConfigurationBuilder;
+import org.infinispan.protostream.WrappedMessage;
 import org.infinispan.quarkus.server.runtime.InfinispanServerProducer;
 import org.infinispan.quarkus.server.runtime.InfinispanServerRecorder;
 import org.infinispan.quarkus.server.runtime.InfinispanServerRuntimeConfig;
@@ -70,7 +71,7 @@ class InfinispanServerProcessor {
       // Don't support SASL in JGroups yet - need to fix elytron
       excludedClasses.produce(new InfinispanReflectionExcludedBuildItem(DotName.createSimple(SASL.class.getName())));
       // We don't support Indexing so don't these to reflection
-      excludedClasses.produce(new InfinispanReflectionExcludedBuildItem(DotName.createSimple(AffinityIndexManager.class.getName())));
+      excludedClasses.produce(new InfinispanReflectionExcludedBuildItem(DotName.createSimple("org.infinispan.query.affinity.AffinityIndexManager")));
       excludedClasses.produce(new InfinispanReflectionExcludedBuildItem(DotName.createSimple(ShardAllocationManagerImpl.class.getName())));
       excludedClasses.produce(new InfinispanReflectionExcludedBuildItem(DotName.createSimple("org.infinispan.query.indexmanager.ClusteredSwitchingBackend")));
       excludedClasses.produce(new InfinispanReflectionExcludedBuildItem(DotName.createSimple("org.infinispan.query.backend.SearchFactoryHandler$CacheListener")));
@@ -78,6 +79,7 @@ class InfinispanServerProcessor {
       excludedClasses.produce(new InfinispanReflectionExcludedBuildItem(DotName.createSimple("org.infinispan.persistence.remote.upgrade.MigrationTask$RemoveListener")));
 
       // TODO: exclude all the TerminalFunctions SerializeWith references
+      // TODO: exclude all the Interceptors?
    }
 
    @Record(ExecutionTime.RUNTIME_INIT)
@@ -116,9 +118,10 @@ class InfinispanServerProcessor {
             "proto/generated/persistence.query.proto",
             "proto/generated/persistence.remote_query.proto",
             "proto/generated/persistence.memcached.proto",
+            "proto/generated/persistence.event_logger.proto",
             // Trim off the forward slash
-            MarshallerRegistration.QUERY_PROTO_RES.substring(1),
-            MarshallerRegistration.MESSAGE_PROTO_RES.substring(1)
+            "org/infinispan/query/remote/client/query.proto",
+            WrappedMessage.PROTO_FILE.substring(1)
       ));
    }
 
