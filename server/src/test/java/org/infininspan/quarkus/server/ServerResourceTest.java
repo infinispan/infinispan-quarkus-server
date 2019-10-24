@@ -19,7 +19,7 @@ public class ServerResourceTest {
                .post("/rest/quarkus-infinispan-server/key-5")
             .then()
                .body(is(""))
-               .statusCode(200);
+               .statusCode(204);
 
       given()
             .when()
