@@ -120,6 +120,7 @@ class InfinispanServerProcessor {
             "proto/generated/persistence.memcached.proto",
             "proto/generated/persistence.event_logger.proto",
             "proto/generated/persistence.multimap.proto",
+            "proto/persistence.m.event_logger.proto",
             // Trim off the forward slash
             "org/infinispan/query/remote/client/query.proto",
             WrappedMessage.PROTO_FILE.substring(1)
