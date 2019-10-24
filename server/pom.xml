@@ -59,6 +59,12 @@
             <artifactId>quarkus-arc</artifactId>
         </dependency>
 
+        <!-- We only need narayanna until embedded extension restriction can be relaxed -->
+        <dependency>
+            <groupId>org.jboss.narayana.jta</groupId>
+            <artifactId>narayana-jta</artifactId>
+        </dependency>
+
         <!-- Elytron Security extension -->
         <!-- We want this extension, but it currently requires vert.x! which starts up an additional netty connector
              Also we have a mismatch between versions in ISPN and Quarkus that needs to be sorted out
