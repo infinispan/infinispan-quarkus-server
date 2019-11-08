@@ -4,12 +4,12 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.infinispan.configuration.internal.PrivateGlobalConfigurationBuilder;
+import org.infinispan.protostream.WrappedMessage;
 import org.infinispan.quarkus.server.runtime.InfinispanServerProducer;
 import org.infinispan.quarkus.server.runtime.InfinispanServerRecorder;
 import org.infinispan.quarkus.server.runtime.InfinispanServerRuntimeConfig;
 import org.infinispan.query.affinity.AffinityIndexManager;
 import org.infinispan.query.affinity.ShardAllocationManagerImpl;
-import org.infinispan.query.remote.client.impl.MarshallerRegistration;
 import org.infinispan.rest.RestServer;
 import org.infinispan.server.configuration.ServerConfigurationBuilder;
 import org.infinispan.server.core.configuration.ProtocolServerConfigurationBuilder;
@@ -33,18 +33,18 @@ import io.quarkus.deployment.builditem.CombinedIndexBuildItem;
 import io.quarkus.deployment.builditem.ExtensionSslNativeSupportBuildItem;
 import io.quarkus.deployment.builditem.FeatureBuildItem;
 import io.quarkus.deployment.builditem.IndexDependencyBuildItem;
-import io.quarkus.deployment.builditem.substrate.ReflectiveClassBuildItem;
-import io.quarkus.deployment.builditem.substrate.RuntimeInitializedClassBuildItem;
-import io.quarkus.deployment.builditem.substrate.SubstrateResourceBuildItem;
-import io.quarkus.deployment.builditem.substrate.SubstrateSystemPropertyBuildItem;
+import io.quarkus.deployment.builditem.nativeimage.NativeImageResourceBuildItem;
+import io.quarkus.deployment.builditem.nativeimage.NativeImageSystemPropertyBuildItem;
+import io.quarkus.deployment.builditem.nativeimage.ReflectiveClassBuildItem;
+import io.quarkus.deployment.builditem.nativeimage.RuntimeInitializedClassBuildItem;
 import io.quarkus.infinispan.embedded.deployment.InfinispanReflectionExcludedBuildItem;
 
 class InfinispanServerProcessor {
    private static final String FEATURE_NAME = "infinispan-server";
    @BuildStep
-   void setSystemProperties(BuildProducer<SubstrateSystemPropertyBuildItem> buildSystemProperties) {
+   void setSystemProperties(BuildProducer<NativeImageSystemPropertyBuildItem> buildSystemProperties) {
       // We disable the replacement of JdkSslContext in the NettyExtensions - this shouldn't be needed once we move to Java 11
-      buildSystemProperties.produce(new SubstrateSystemPropertyBuildItem("substratevm.replacement.jdksslcontext", "false"));
+      buildSystemProperties.produce(new NativeImageSystemPropertyBuildItem("substratevm.replacement.jdksslcontext", "false"));
    }
 
    @BuildStep
@@ -94,7 +94,7 @@ class InfinispanServerProcessor {
 
    @BuildStep
    void addReflectionAndResources(BuildProducer<ReflectiveClassBuildItem> reflectionClass,
-         BuildProducer<SubstrateResourceBuildItem> resources, CombinedIndexBuildItem combinedIndexBuildItem) {
+         BuildProducer<NativeImageResourceBuildItem> resources, CombinedIndexBuildItem combinedIndexBuildItem) {
 
       reflectionClass.produce(new ReflectiveClassBuildItem(false, false, PrivateGlobalConfigurationBuilder.class.getName()));
       reflectionClass.produce(new ReflectiveClassBuildItem(false, false, ServerConfigurationBuilder.class.getName()));
@@ -110,15 +110,19 @@ class InfinispanServerProcessor {
       // TODO: not sure why this is required for native runtime...
       reflectionClass.produce(new ReflectiveClassBuildItem(false, false, NoTypePermission.class.getName()));
 
-      resources.produce(new SubstrateResourceBuildItem("infinispan-defaults.xml",
+      resources.produce(new NativeImageResourceBuildItem("infinispan-defaults.xml",
             "proto/generated/persistence.rocksdb.proto",
             "proto/generated/persistence.counters.proto",
             "proto/generated/persistence.query.proto",
             "proto/generated/persistence.remote_query.proto",
             "proto/generated/persistence.memcached.proto",
-            // Trim off the forward slash
-            MarshallerRegistration.QUERY_PROTO_RES.substring(1),
-            MarshallerRegistration.MESSAGE_PROTO_RES.substring(1)
+            "proto/generated/persistence.event_logger.proto",
+            "proto/generated/persistence.multimap.proto",
+            "proto/persistence.m.event_logger.proto",
+            "proto/generated/persistence.server.core.proto",
+            "proto/generated/persistence.scripting.proto",
+            "org/infinispan/query/remote/client/query.proto",
+            WrappedMessage.PROTO_FILE
       ));
    }
 
