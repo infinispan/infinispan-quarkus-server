@@ -5,4 +5,4 @@ An Infinispan Server that runs on top of Quarkus runtime allowing for native bin
 
 Authentication and Indexing are not supported currently.
 
-The current build requires a SNAPSHOT of Quarkus built on top of commit SHA: 980f67b7b4dfce8cff2255195d24ca50b5f2496f
+The current build builds on top of 1.0.0.CR2 of Quarkus.
